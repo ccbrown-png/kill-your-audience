@@ -188,6 +188,7 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
   justify-content: center;
   padding: 0 4%;
   text-align: center;
+  pointer-events: none; /* it covers the whole screen; clicks must reach the start button */
 }
 #title-lockup h1 {
   display: flex;
@@ -196,10 +197,10 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
   margin: 0;
   color: var(--type);
 }
-/* 2pt white stroke makes the hero line heavier than the rest of the type. */
+/* 1pt white stroke makes the hero line a little heavier than the rest of the type. */
 .title-hero {
   font-size: var(--hero);
-  -webkit-text-stroke: 2pt #fff;
+  -webkit-text-stroke: 1pt #fff;
   line-height: 1.05;
   letter-spacing: 0.06em;
 }

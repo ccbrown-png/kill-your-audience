@@ -88,7 +88,7 @@ export function createGameFlow(domElement, { onPause, onRestart, onUserClick }) 
   function setReady() {
     state = 'title';
     startButton.disabled = false;
-    startButton.textContent = 'CLICK TO SHOWER';
+    startButton.textContent = 'START YOUR SHOWER';
   }
 
   function setLoadFailed() {
