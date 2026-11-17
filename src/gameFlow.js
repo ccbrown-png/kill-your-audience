@@ -7,6 +7,9 @@ export function createGameFlow(domElement, { onPause, onRestart, onUserClick }) 
   const startButton = document.getElementById('start-button');
   const pauseScreen = document.getElementById('pause-screen');
   const pauseHint = document.getElementById('pause-hint');
+  const resumeButton = document.getElementById('resume-button');
+  const restartButton = document.getElementById('restart-button');
+  const homeButton = document.getElementById('home-button');
   const endButton = document.getElementById('end-button');
   const DEFAULT_PAUSE_HINT = pauseHint.textContent;
 
@@ -31,8 +34,28 @@ export function createGameFlow(domElement, { onPause, onRestart, onUserClick }) 
   startButton.addEventListener('click', () => {
     if (state === 'title') lockMouse();
   });
-  pauseScreen.addEventListener('click', () => {
+  // Pause menu. Resume and Start Over grab the mouse again; Home goes back to the title, reset for a fresh run.
+  resumeButton.addEventListener('click', () => {
     if (state === 'paused') lockMouse();
+  });
+  restartButton.addEventListener('click', () => {
+    if (state !== 'paused') return;
+    onRestart();
+    lockMouse();
+  });
+  homeButton.addEventListener('click', () => {
+    if (state !== 'paused') return;
+    onRestart();
+    state = 'title';
+    pauseScreen.hidden = true;
+    pauseHint.textContent = DEFAULT_PAUSE_HINT;
+    titleScreen.hidden = false;
+    startButton.focus({ preventScroll: true });
+  });
+  // Esc again while paused resumes. Browsers may refuse to lock the mouse from a key press
+  // (and for about a second after Esc); the pointerlockerror handler then asks for a click.
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && state === 'paused' && !event.repeat) lockMouse();
   });
   endButton.addEventListener('click', () => {
     if (state === 'ended') lockMouse();
@@ -51,6 +74,7 @@ export function createGameFlow(domElement, { onPause, onRestart, onUserClick }) 
       if (state === 'playing') {
         state = 'paused';
         pauseScreen.hidden = false;
+        resumeButton.focus({ preventScroll: true }); // so Enter resumes if the browser refuses Esc
         onPause();
       }
     }
@@ -58,7 +82,7 @@ export function createGameFlow(domElement, { onPause, onRestart, onUserClick }) 
 
   // Chrome refuses to re-grab the mouse for about a second after Esc.
   document.addEventListener('pointerlockerror', () => {
-    if (state === 'paused') pauseHint.textContent = 'ONE SECOND... CLICK AGAIN';
+    if (state === 'paused') pauseHint.textContent = 'CLICK RESUME (OR PRESS ENTER) TO KEEP SHOWERING';
   });
 
   function setReady() {
