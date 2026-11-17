@@ -28,6 +28,13 @@ export function createPlayer(camera, domElement) {
     applyLook();
   });
 
+  /** Turns the view by a drag of dx, dy pixels (touch look). */
+  function addLook(dx, dy, sensitivity) {
+    yaw -= dx * sensitivity;
+    pitch -= dy * sensitivity;
+    applyLook();
+  }
+
   /** Point the camera at a world position by setting yaw/pitch, so mouse-look continues from there. */
   function faceWorldPosition(target) {
     const dir = target.clone().sub(camera.position);
@@ -81,5 +88,5 @@ export function createPlayer(camera, domElement) {
     applyLook();
   }
 
-  return { placeAtSpawn, getPitchDegrees, isLocked, faceWorldPosition, setLook, getYaw: () => yaw };
+  return { placeAtSpawn, addLook, getPitchDegrees, isLocked, faceWorldPosition, setLook, getYaw: () => yaw };
 }

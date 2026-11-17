@@ -3,17 +3,19 @@ import { HOLD_TIME, DECAY_RATE, LOOK_DOWN_ANGLE, INCLUDE_TOWEL_STEP } from './co
 // Special target: satisfied by pitching the camera down past LOOK_DOWN_ANGLE instead of looking at an object.
 export const LOOK_DOWN = 'LOOK_DOWN';
 
+// hint: the line under the step in the routine panel, telling a new player where to look.
+const BOTH_HANDS = 'Both hands: the can drops. Spray to bring it back up';
 export const STEPS = [
-  { label: 'Grab the Raid', target: 'RaidCan', hands: 1, grabsCan: true },
-  { label: 'Turn on the water', target: 'BathTubHandleMiddle', hands: 1, startsWater: true },
-  { label: 'Wet your hair', target: 'BathTubShowerHead', hands: 2 },
-  { label: 'Grab the shampoo', target: 'Shelf', hands: 1 },
-  { label: 'Lather', target: LOOK_DOWN, hands: 2 },
-  { label: 'Rinse', target: 'BathTubShowerHead', hands: 1 },
-  { label: 'Grab the body wash', target: 'Shelf', hands: 1 },
-  { label: 'Final rinse', target: 'BathTubShowerHead', hands: 1 },
-  { label: 'Turn off the water', target: 'BathTubHandleMiddle', hands: 1, stopsWater: true },
-  ...(INCLUDE_TOWEL_STEP ? [{ label: 'Grab the towel', target: 'Towel', hands: 1 }] : []),
+  { label: 'Grab the Raid', target: 'RaidCan', hands: 1, grabsCan: true, hint: 'Find the can outside the curtain. Keep the dot on it' },
+  { label: 'Turn on the water', target: 'BathTubHandleMiddle', hands: 1, startsWater: true, hint: 'Keep the dot on the middle faucet handle' },
+  { label: 'Wet your hair', target: 'BathTubShowerHead', hands: 2, hint: `Look up at the showerhead. ${BOTH_HANDS}` },
+  { label: 'Grab the shampoo', target: 'Shelf', hands: 1, hint: 'Look at the shelf' },
+  { label: 'Lather', target: LOOK_DOWN, hands: 2, hint: `Look down at your feet. ${BOTH_HANDS}` },
+  { label: 'Rinse', target: 'BathTubShowerHead', hands: 1, hint: 'Look up at the showerhead' },
+  { label: 'Grab the body wash', target: 'Shelf', hands: 1, hint: 'Look at the shelf' },
+  { label: 'Final rinse', target: 'BathTubShowerHead', hands: 1, hint: 'Look up at the showerhead' },
+  { label: 'Turn off the water', target: 'BathTubHandleMiddle', hands: 1, stopsWater: true, hint: 'Keep the dot on the middle faucet handle' },
+  ...(INCLUDE_TOWEL_STEP ? [{ label: 'Grab the towel', target: 'Towel', hands: 1, hint: 'Look at the towel. Then you\'re free' }] : []),
 ];
 
 /**
@@ -99,6 +101,7 @@ export function createRoutine() {
       totalSteps: STEPS.length,
       label: STEPS[stepIndex].label,
       hands: STEPS[stepIndex].hands,
+      hint: STEPS[stepIndex].hint ?? '',
       progress,
       complete,
     };

@@ -1,12 +1,16 @@
-// Entry point. Phones and tablets get a message instead of downloading a game they can't play.
-const touchOnly = window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(any-pointer: fine)').matches;
+// Entry point. The AI heads-up shows first while the game loads behind it.
+import './input.js'; // marks touch screens with body.touch before anything draws
+import { hideAiWarning, setUpAiWarning } from './aiWarning.js';
 
-if (new URLSearchParams(location.search).has('gallery')) {
+const params = new URLSearchParams(location.search);
+
+if (params.has('gallery')) {
   // ?gallery=NAME shows one piece of art on a turntable instead of the game (see src/art/gallery.js).
+  hideAiWarning();
   import('./art/gallery.js');
-} else if (touchOnly) {
-  document.getElementById('start-button').hidden = true;
-  document.getElementById('mobile-note').hidden = false;
 } else {
+  // ?test (automated playthroughs) goes straight to the title.
+  if (params.has('test')) hideAiWarning();
+  else setUpAiWarning();
   import('./game.js');
 }

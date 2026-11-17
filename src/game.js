@@ -30,10 +30,13 @@ import { buildSpiderPaths } from './spiderPaths.js';
 import { createSpiders } from './spiders.js';
 import { createSpray } from './spray.js';
 import { createThreat } from './threat.js';
+import { IS_TOUCH } from './input.js';
+import { createTouchControls } from './touchControls.js';
 
 // --- Renderer, scene, camera ---
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// Phones have very dense screens; rendering every pixel would cost more frame rate than it's worth.
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_TOUCH ? 1.5 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -41,6 +44,20 @@ const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.05, 100);
 scene.add(camera); // the camera has to be in the scene for the can attached to it to render
+
+// The camera's field of view is vertical, so on a tall phone screen held upright the view would be a
+// narrow slot. Widen it until you can see at least MIN_SIDE_FOV degrees side to side.
+const BASE_FOV = 70;
+const MIN_SIDE_FOV = 62;
+const MAX_FOV = 100;
+function fitCamera() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  const halfSide = THREE.MathUtils.degToRad(MIN_SIDE_FOV / 2);
+  const neededFov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(halfSide) / camera.aspect));
+  camera.fov = THREE.MathUtils.clamp(neededFov, BASE_FOV, MAX_FOV);
+  camera.updateProjectionMatrix();
+}
+fitCamera();
 
 // --- Lights, reflections and all the art (src/art/) ---
 const art = createArtDirector(renderer, scene);
@@ -75,6 +92,7 @@ let playTime = 0; // seconds of actual play, not counting pauses
 const flow = createGameFlow(renderer.domElement, {
   onUserClick: unlockAudio,
   onPause: () => {
+    touch?.release();
     spray.release();
     suspendAudio();
   },
@@ -108,6 +126,10 @@ routine.on('stepComplete', ({ step }) => {
     art.setWaterRunning(false);
   }
 });
+
+const touch = IS_TOUCH
+  ? createTouchControls({ canvas: renderer.domElement, player, spray, isPlaying: flow.isPlaying, onPauseButton: flow.pause })
+  : null;
 
 const hands = createHands(camera);
 const handsController = createHandsController(routine, hands, can, camera);
@@ -154,6 +176,7 @@ function endGame(result) {
   if (!flow.isPlaying()) return;
   if (result === 'lose' && debug.isGodMode()) return;
   flow.end();
+  touch?.release();
   spray.stop();
   can.setVisible(false);
   hands.setVisible(false);
@@ -170,6 +193,7 @@ function endGame(result) {
 /** Puts everything back to the start of a run, without reloading the page. */
 function restartGame() {
   endings.reset();
+  fitCamera(); // the screen may have been turned since the run started
   endScreen.hide();
   document.body.classList.remove('ended');
   routine.reset();
@@ -224,8 +248,11 @@ new GLTFLoader().load(
 
 // --- Resize ---
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+  if (!endings.isRunning()) fitCamera(); // the lose zoom owns the field of view while it plays
+  else {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  }
   renderer.setSize(window.innerWidth, window.innerHeight);
   postProcessing.setSize(window.innerWidth, window.innerHeight);
 });

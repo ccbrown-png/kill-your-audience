@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Kill Your Audience: The Game</title>
     <meta name="description" content="Kill Your Audience: The Game. A Raid production. You're in the shower. They're coming." />
     <meta property="og:title" content="Kill Your Audience: The Game" />
@@ -20,6 +20,11 @@
     <style>
       html, body { margin: 0; height: 100%; overflow: hidden; background: #030b10; }
       canvas { display: block; }
+      /* Touch screens: no scrolling, pinch-zoom, pull-to-refresh, text selection or tap flashes. */
+      /* Touch screens: no pull-to-refresh, double-tap zoom, text selection or tap flashes. While playing,
+         no browser gestures at all (every drag is looking around). Menus stay scrollable. */
+      body.touch { touch-action: manipulation; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+      body.touch.playing, body.touch canvas { touch-action: none; }
 
       #crosshair {
         position: fixed;
@@ -47,10 +52,11 @@
 
       #routine-panel {
         position: fixed;
-        bottom: 32px;
+        bottom: calc(24px + env(safe-area-inset-bottom));
         left: 50%;
         transform: translateX(-50%);
-        width: min(360px, calc(100% - 32px));
+        width: min(380px, calc(100% - 32px));
+        box-sizing: border-box;
         padding: 8px 12px;
         font: 16px sans-serif;
         color: #fff;
@@ -58,6 +64,13 @@
         background: rgba(0, 0, 0, 0.6);
         pointer-events: none;
       }
+      #routine-hint {
+        margin-top: 3px;
+        font-size: 13px;
+        line-height: 1.3;
+        opacity: 0.75;
+      }
+      #routine-hint:empty { display: none; }
       #routine-bar {
         height: 10px;
         margin-top: 6px;
@@ -73,8 +86,8 @@
 
       #kill-counter {
         position: fixed;
-        top: 12px;
-        right: 12px;
+        top: calc(12px + env(safe-area-inset-top));
+        right: calc(12px + env(safe-area-inset-right));
         padding: 4px 10px;
         font: 22px Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
         letter-spacing: 1px;
@@ -120,7 +133,9 @@
       /* Gallery mode (?gallery=NAME): no game UI, just the asset and a label. */
       body.gallery #crosshair, body.gallery #debug-label, body.gallery #routine-panel, body.gallery #kill-counter,
       body.gallery #threat-bar, body.gallery #title-screen,
-      body.gallery #fullscreen-button, body.gallery #esc-hint { display: none !important; }
+      body.gallery #fullscreen-button, body.gallery #esc-hint, body.gallery #ai-warning { display: none !important; }
+      /* The target-name readout is for development; on a phone it's just clutter in the corner. */
+      body.touch #debug-label { display: none; }
       #gallery-label {
         position: fixed; left: 12px; bottom: 12px; padding: 4px 8px;
         font: 13px/1.4 monospace; color: #cfd8dc; background: rgba(0, 0, 0, 0.6); pointer-events: none;
@@ -133,6 +148,7 @@
     <div id="debug-label">Target: none</div>
     <div id="routine-panel">
       <div id="routine-label"></div>
+      <div id="routine-hint"></div>
       <div id="routine-bar"><div id="routine-fill"></div></div>
     </div>
     <div id="kill-counter">KILLS: 0</div>
@@ -155,13 +171,61 @@
         <p id="title-signoff" class="horror-type">by RAID</p>
       </div>
       <button id="start-button" class="horror-type" disabled>LOADING...</button>
-      <p id="mobile-note" class="horror-type" hidden>BEST PLAYED ON DESKTOP WITH A MOUSE</p>
+      <p id="mobile-note" class="horror-type">TURN YOUR PHONE SIDEWAYS FOR THE BEST VIEW</p>
+    </div>
+
+    <!-- Before the first run: what's going on, what you're doing, what's after you. -->
+    <div id="howto-screen" class="screen" hidden>
+      <div id="howto-inner">
+        <h2 class="horror-type">HOW TO SURVIVE YOUR SHOWER</h2>
+        <ol id="howto-list">
+          <li>
+            <span class="howto-label horror-type">THE THREAT</span>
+            <span>Spiders are coming for you. They show up at the edges of your view and creep closer every few seconds. If one reaches you, it's over.</span>
+          </li>
+          <li>
+            <span class="howto-label horror-type">YOUR JOB</span>
+            <span>Finish your shower. Your next step is at the bottom of the screen. Keep the dot in the middle of the screen on it until the bar fills.</span>
+          </li>
+          <li>
+            <span class="howto-label horror-type">YOUR WEAPON</span>
+            <span><span class="only-mouse">Move the mouse to look. Hold the left mouse button to spray Raid.</span><span class="only-touch">Drag anywhere to look. Hold SPRAY to spray Raid, and slide your thumb on it to aim.</span> Keep the dot on a spider while spraying to kill it. The can does run out.</span>
+          </li>
+          <li>
+            <span class="howto-label horror-type">WATCH OUT</span>
+            <span>The red line at the top is your dread. It grows while spiders are alive and shrinks when they're dead. If it fills, you lose. Washing your hair takes both hands, so the can drops; spray to bring it back up.</span>
+          </li>
+        </ol>
+        <button id="howto-button" class="menu-button horror-type" type="button">GOT IT. LET ME SHOWER.</button>
+      </div>
+    </div>
+
+    <!-- First thing on the page. Shown until the player chooses; src/aiWarning.js. -->
+    <div id="ai-warning" class="screen">
+      <div class="ai-tape" aria-hidden="true"></div>
+      <div id="ai-ask" class="ai-card">
+        <p class="ai-kicker horror-type">&#9888; CAUTION &#9888; WARNING &#9888;</p>
+        <h2 class="horror-type">THIS NEXT THING WAS MADE WITH GENERATIVE AI.</h2>
+        <p class="ai-body">If you hate AI, this is your moment. Shield your eyes and move on. Honestly, no hard feelings.</p>
+        <p class="ai-fine">(If you're fine with it, the real warning is the spiders.)</p>
+        <div class="ai-buttons">
+          <button id="ai-leave" class="menu-button horror-type" type="button">SHIELD MY EYES</button>
+          <button id="ai-enter" class="menu-button horror-type" type="button">I'LL ALLOW IT</button>
+        </div>
+      </div>
+      <div id="ai-shielded" class="ai-card">
+        <h2 class="horror-type">EYES: SHIELDED.</h2>
+        <p class="ai-body">Respect. Nothing to see here. Go enjoy a nice, normal, spider-free shower.</p>
+        <button id="ai-back" class="ai-link" type="button">wait, actually, show me</button>
+      </div>
+      <div class="ai-tape ai-tape-bottom" aria-hidden="true"></div>
     </div>
 
     <div id="pause-screen" class="screen" hidden>
       <h2 class="horror-type">PAUSED</h2>
       <div id="pause-menu">
         <button id="resume-button" class="menu-button horror-type" type="button">RESUME</button>
+        <button id="howto-menu-button" class="menu-button horror-type" type="button">HOW TO PLAY</button>
         <button id="restart-button" class="menu-button horror-type" type="button">START OVER</button>
         <button id="home-button" class="menu-button horror-type" type="button">HOME SCREEN</button>
       </div>
@@ -180,6 +244,12 @@
       <svg viewBox="0 0 9 9" width="9" height="9"><path d="M1 1h4v1H2v3H1zM4 3h1v1h1v1h1v1h1v1H7V6H6V5H5V4H4z M1 7h2v1H1z" fill="currentColor"/></svg>
       <span>ESC</span>
     </div>
+
+    <!-- Touch screens only (body.touch), while playing. src/touchControls.js -->
+    <button id="spray-button" type="button" aria-label="Spray">SPRAY</button>
+    <button id="pause-button" type="button" aria-label="Pause">
+      <svg viewBox="0 0 9 9" width="14" height="14" aria-hidden="true"><path d="M2 1h2v7H2zM5 1h2v7H5z" fill="currentColor"/></svg>
+    </button>
 
     <button id="fullscreen-button" type="button" aria-label="Enter fullscreen" title="Fullscreen">
       <!-- Pixel corner brackets on a 9px grid; flips inward when fullscreen. -->

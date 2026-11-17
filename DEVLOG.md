@@ -299,3 +299,11 @@ Full write-up, screenshots list, Blender steps and perf numbers: **ART_PASS_REPO
 - Spiders on the pale tiles: easier to spot than before. Does the game get easier?
 - Frame rate on your MacBook with QUALITY 'high', then 'low'
 - Hands at the top of the screen during Wet your hair / Lather: visible enough?
+
+## Onboarding, difficulty and mobile (2026-11-17)
+
+- **AI heads-up first:** a caution screen on page load says the game was made with generative AI. "I'll allow it" goes to the title; "Shield my eyes" shows a polite goodbye with a small "wait, actually, show me" link back. `src/aiWarning.js`. Skipped on `?test` and `?gallery`.
+- **How to play:** pressing START the first time each visit shows a four-part briefing (the threat, your job, your weapon, watch out) before play. Also in the pause menu as HOW TO PLAY. Wording changes with mouse vs touch. Each routine step now has a hint line under it saying where to look (`hint` in `src/routine.js`).
+- **Easier:** spiders come less often and creep slower, die faster, are easier to hit, the can holds twice as much, dread fills slower and drains faster, steps fill faster and drain slower, late spiders start closer only one stage instead of two, fewer fake shadows. Every changed number in `src/config.js` has `// was ...` beside it.
+- **Mobile:** the game no longer refuses phones. `src/input.js` detects touch (force with `?touch` or `?mouse`), `src/touchControls.js` handles drag-to-look, the SPRAY button (slide on it to aim; two fingers work too) and the pause button. Touch play needs no mouse lock; switching apps pauses. Phones get low quality, a 1.5x pixel ratio cap, a bigger spider hit area (`TOUCH_HIT_RADIUS_SCALE`), and a wider field of view when held upright. Upright phones see "turn your phone sideways" on the title.
+- Tested in Chrome with simulated touches at 390x720 and 750x360, plus desktop. Not yet tested on a real phone: frame rate, iOS Safari audio, and how the drag speed (`TOUCH_LOOK_SENSITIVITY`) feels.

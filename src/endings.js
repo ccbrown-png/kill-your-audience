@@ -18,7 +18,7 @@ export function createEndings(camera, onFinished) {
   const startRotation = new THREE.Quaternion();
   const endRotation = new THREE.Quaternion();
   const lookMatrix = new THREE.Matrix4();
-  const startFov = camera.fov;
+  let startFov = camera.fov;
 
   let running = null; // 'lose', 'win' or null
   let time = 0;
@@ -28,6 +28,7 @@ export function createEndings(camera, onFinished) {
   function startLose(target) {
     running = 'lose';
     time = 0;
+    startFov = camera.fov;
     hasTarget = target !== null;
     if (hasTarget) {
       startPosition.copy(camera.position);

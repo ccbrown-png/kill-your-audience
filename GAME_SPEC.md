@@ -130,7 +130,7 @@ Goal: a fully playable version of the game with placeholder art and sound, so it
 - Debug keys: K kills all spiders, G toggles god mode (no loss), N skips to next step, T spawns a spider in front of the camera
 
 **Mobile**
-- On touch devices, show a styled "Best played on desktop with a mouse" screen with the title art instead of a broken game
+- ~~On touch devices, show a styled "Best played on desktop with a mouse" screen~~ *(changed Nov 17)* Touch devices play the full game: drag to look, hold an on-screen SPRAY button (drag on it to aim), pause button top left, quality forced to low, wider field of view when held upright
 
 **Ship**
 - Confirm `npm run build` works, all asset paths are lowercase, then give me step-by-step instructions to deploy to Vercel

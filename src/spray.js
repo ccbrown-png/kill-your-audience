@@ -33,6 +33,11 @@ export function createSpray({ camera, crosshair, can, particles, hiss, rattle, s
     if (event.button === 0) held = false;
   });
 
+  /** The touch SPRAY button presses and releases the trigger through this. */
+  function setHeld(value) {
+    held = value && isPlaying();
+  }
+
   /** Stops spraying immediately, for when the game pauses with the button still down. */
   function release() {
     held = false;
@@ -110,6 +115,7 @@ export function createSpray({ camera, crosshair, can, particles, hiss, rattle, s
   return {
     update,
     release,
+    setHeld,
     stop,
     reset,
     areHandsFree: () => raised <= 0,

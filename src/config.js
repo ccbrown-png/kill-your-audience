@@ -1,11 +1,13 @@
 // Tunable numbers for playtesting. Change these and save — the page reloads automatically.
+// Nov 17 difficulty pass: the game was made easier. Each changed number notes its old value,
+// so putting any of them back makes it harder again.
 
 // Seconds of continuous gaze needed to complete a routine step.
-export const HOLD_TIME = 2.5;
+export const HOLD_TIME = 2; // was 2.5 before the Nov 17 difficulty pass
 
 // How fast progress drains when looking away, as a fraction of the fill speed.
 // 0.35 = drains at 35% of the speed it fills (so a full bar takes ~7s to empty).
-export const DECAY_RATE = 0.35;
+export const DECAY_RATE = 0.2; // was 0.35
 
 // Downward look angle in degrees that counts as "looking down" (0 = level, -90 = straight down).
 export const LOOK_DOWN_ANGLE = -50;
@@ -29,7 +31,7 @@ export const SPIDER_SPRAYED_PANIC = 4;
 
 // Radius in meters of the invisible ball around a spider that the crosshair has to touch.
 // Bigger = easier to hit. Spiders are tiny, so this is more forgiving than their actual shape.
-export const SPIDER_HIT_RADIUS = 0.06;
+export const SPIDER_HIT_RADIUS = 0.085; // was 0.06
 
 // How far behind the surface under the crosshair a spider can be and still get hit, in meters.
 // Without this, a fold of the curtain sitting slightly in front of a spider shields it.
@@ -42,8 +44,8 @@ export const SPIDER_DEATH_TIME = 1;
 
 // A new spider appears after a random wait between these two numbers, in seconds.
 // These are the values at the start of the routine. See Escalation for the end values.
-export const SPAWN_MIN = 3;
-export const SPAWN_MAX = 7;
+export const SPAWN_MIN = 5; // was 3
+export const SPAWN_MAX = 9; // was 7
 
 // How much more likely a spawn point is if it's off-screen or near the screen edge.
 // 5 = five times as likely as a spawn point in the middle of your view.
@@ -65,7 +67,7 @@ export const FALLBACK_SPAWN_POINTS = [
 // --- Spray ---
 
 // Seconds of spray a spider has to take under the crosshair before it dies.
-export const SPRAY_KILL_TIME = 0.8;
+export const SPRAY_KILL_TIME = 0.5; // was 0.8
 
 // Spray particles created per second while holding the mouse.
 export const SPRAY_PARTICLE_RATE = 340;
@@ -108,7 +110,7 @@ export const SPRAY_HISS_VOLUME = 0.28;
 // --- Spider approach ---
 
 // Seconds a spider rests at each stage before moving closer, at the start of the routine.
-export const STAGE_TIME = 3.5;
+export const STAGE_TIME = 5; // was 3.5
 
 // How many moves it takes a spider to reach the player. Finishing the last one is an instant loss.
 export const APPROACH_STAGES = 4;
@@ -144,11 +146,11 @@ export const SPIDER_GOAL_SIDE_PREFERENCE = 0.25;
 export const THREAT_MAX = 100;
 
 // Threat added per second by each living spider, and the extra added for each stage it has advanced.
-export const THREAT_RATE_BASE = 1.5;
-export const THREAT_RATE_PER_STAGE = 1.5;
+export const THREAT_RATE_BASE = 0.9; // was 1.5
+export const THREAT_RATE_PER_STAGE = 0.9; // was 1.5
 
 // Threat removed per second while no spiders are alive.
-export const THREAT_DECAY = 3;
+export const THREAT_DECAY = 6; // was 3
 
 // --- Lose and win endings ---
 
@@ -202,7 +204,7 @@ export const CAN_LOWERED_DROP = 0.32;
 // --- Spray ammo ---
 
 // Total seconds of spray in the can. There are no refills.
-export const SPRAY_MAX = 10;
+export const SPRAY_MAX = 20; // was 10
 
 // When the can is empty it coughs out weak puffs. Seconds each puff lasts.
 export const SPRAY_SPUTTER_PUFF_TIME = 0.08;
@@ -223,20 +225,20 @@ export const SPRAY_RATTLE_VOLUME = 0.5;
 // last step. The start values are SPAWN_MIN, SPAWN_MAX and STAGE_TIME, further up this file.
 
 // Spawn wait range on the last step, in seconds.
-export const SPAWN_MIN_END = 1.8;
-export const SPAWN_MAX_END = 3.5;
+export const SPAWN_MIN_END = 3; // was 1.8
+export const SPAWN_MAX_END = 5.5; // was 3.5
 
 // Seconds a spider rests at each stage on the last step.
-export const STAGE_TIME_END = 2.2;
+export const STAGE_TIME_END = 3.5; // was 2.2
 
 // Which stage new spiders start at. 0 = at the spawn point, 2 = already halfway to you.
 export const START_STAGE_START = 0;
-export const START_STAGE_END = 2;
+export const START_STAGE_END = 1; // was 2
 
 // --- Decoys ---
 
 // Chance that a spawn is a fake shadow instead of a spider. 0.15 = 15%.
-export const DECOY_CHANCE = 0.15;
+export const DECOY_CHANCE = 0.1; // was 0.15
 
 // The most fake shadows that can be on the tiles at once.
 export const DECOY_MAX = 2;
@@ -302,6 +304,14 @@ export const HEARTBEAT_START_THREAT = 0.15;
 // Seconds between heartbeats when it first starts, and at full threat.
 export const HEARTBEAT_GAP_SLOW = 1.1;
 export const HEARTBEAT_GAP_FAST = 0.36;
+
+// --- Touch screens (phones and tablets) ---
+
+// How far the view turns per pixel of finger drag, in radians. Higher = faster turning.
+export const TOUCH_LOOK_SENSITIVITY = 0.0055;
+
+// Spiders' hit area is this many times bigger on touch screens, because aiming with a thumb is harder.
+export const TOUCH_HIT_RADIUS_SCALE = 1.4;
 
 // --- Looking around ---
 

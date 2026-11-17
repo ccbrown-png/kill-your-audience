@@ -3,6 +3,7 @@ import { createSpider } from './spiderModel.js';
 import { surfaceRotation } from './spawnPoints.js';
 import { samplePath } from './spiderPaths.js';
 import { isPeripheral } from './peripheral.js';
+import { IS_TOUCH } from './input.js';
 import {
   SPAWN_MIN,
   SPAWN_MAX,
@@ -28,7 +29,11 @@ import {
   START_STAGE_END,
   DECOY_CHANCE,
   AUDIO_LIE_CHANCE,
+  TOUCH_HIT_RADIUS_SCALE,
 } from './config.js';
+
+// Aiming by dragging a thumb is clumsier than a mouse, so spiders are easier to hit on touch screens.
+const HIT_RADIUS = SPIDER_HIT_RADIUS * (IS_TOUCH ? TOUCH_HIT_RADIUS_SCALE : 1);
 
 const randomBurst = () => THREE.MathUtils.randFloat(SKITTER_BURST_MIN, SKITTER_BURST_MAX);
 const randomPause = () => THREE.MathUtils.randFloat(SKITTER_PAUSE_MIN, SKITTER_PAUSE_MAX);
@@ -120,7 +125,7 @@ export function createSpiders(scene, camera, { onKill, onReachedPlayer, onSkitte
     const spider = {
       model,
       point,
-      hitSphere: new THREE.Sphere(new THREE.Vector3(), SPIDER_HIT_RADIUS),
+      hitSphere: new THREE.Sphere(new THREE.Vector3(), HIT_RADIUS),
       sprayTaken: 0,
       sprayedThisFrame: false,
       animationTime: Math.random() * 100,
