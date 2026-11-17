@@ -174,14 +174,13 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
 }
 
 /*
- * Title lockup: one centered stack in the area above the start button (which sits at bottom 14%).
- * The box covers the top 71% of the screen and centers the lockup in it, so it lands upper-middle
- * and can never reach the button. Hero size is capped by viewport width so the line fits.
+ * Title lockup: one stack centered on the screen. The start button sits at bottom 14%, below it.
+ * Hero size is capped by viewport width so the line fits.
  */
 #title-lockup {
   --hero: clamp(22px, min(calc(var(--u) * 6.4), 6.8vw), 128px);
   position: absolute;
-  inset: 0 0 29% 0;
+  inset: 0;
   z-index: 1;
   display: flex;
   flex-direction: column;
@@ -197,8 +196,10 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
   margin: 0;
   color: var(--type);
 }
+/* 2pt white stroke makes the hero line heavier than the rest of the type. */
 .title-hero {
   font-size: var(--hero);
+  -webkit-text-stroke: 2pt #fff;
   line-height: 1.05;
   letter-spacing: 0.06em;
 }
@@ -212,20 +213,11 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
 }
 #title-signoff {
   --sign: clamp(10px, calc(var(--hero) * 0.21), 26px);
-  display: flex;
-  align-items: center;
-  gap: 0.55em;
   margin: calc(var(--hero) * 0.38) 0 0;
   font-size: var(--sign);
+  padding-left: 0.2em;
   letter-spacing: 0.2em;
   color: rgba(237, 237, 236, 0.68);
-}
-#title-can {
-  display: block;
-  height: 3.2em;
-  width: auto;
-  pointer-events: none;
-  user-select: none;
 }
 
 /* The blurred spider from print1, creeping in the foreground. */
