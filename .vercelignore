@@ -1,0 +1,5 @@
+_backup_before_art_pass
+art_pass_screenshots
+dist
+node_modules
+*.md

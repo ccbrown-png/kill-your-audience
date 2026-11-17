@@ -1,0 +1,335 @@
+/*
+ * Title, pause, win and lose screens, styled after the print campaign.
+ * Colors were sampled from print1-3.png (backgrounds, headline type) and CARD 1/3.png (paper, ink).
+ * Linked from index.html. HUD styles stay in index.html.
+ */
+
+:root {
+  /* print1-3 sampled bands: median, 60-75th, 75-90th, 90-97th percentile */
+  --bg-deep: #030b10;
+  --bg: #071623;
+  --bg-glow: #0f2c49;
+  --bg-light: #2d5a81;
+  /* brightest pixels of the "SOME STALKERS" headline */
+  --type: #ededec;
+  /* CARD paper and ink */
+  --paper: #f1f1f0;
+  --paper-edge: #d6d6d2;
+  --ink: #1a1a1a;
+
+  --font-type: 'secret-service', 'Special Elite', 'Courier New', monospace;
+
+  /* One layout unit that works in a full window and in a ~800x450 16:9 iframe. */
+  --u: min(1vw, 1.778vh);
+
+  --inked: 0.4px 0.4px 0 rgba(237, 237, 236, 0.28), -0.3px 0 0 rgba(237, 237, 236, 0.18);
+  --inked-dark: 0.4px 0.4px 0 rgba(26, 26, 26, 0.35), -0.3px 0 0 rgba(26, 26, 26, 0.2);
+}
+
+/* ---------- Shared ---------- */
+
+/* Typewriter lettering. #rough (index.html) is a fine turbulence that chews the edges like ink on paper. */
+.horror-type {
+  font-family: var(--font-type);
+  font-weight: normal;
+  filter: url(#rough);
+}
+
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  box-sizing: border-box;
+  overflow: hidden;
+  font-family: var(--font-type);
+  color: var(--type);
+  text-shadow: var(--inked);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The lose fade goes to the campaign's blue-black, not pure black, and stops short of opaque so the spider stays visible. */
+#fade {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  background: rgba(3, 11, 16, 0.66);
+  opacity: 0;
+  pointer-events: none;
+}
+
+#end-stats, #pause-hint { filter: url(#rough); }
+
+/* Film grain and vignette over everything, only while a screen is showing. */
+body:not(.gallery):has(.screen:not([hidden]))::before,
+body:not(.gallery):has(.screen:not([hidden]))::after {
+  content: '';
+  position: fixed;
+  pointer-events: none;
+  z-index: 11;
+}
+body:not(.gallery):has(.screen:not([hidden]))::before {
+  inset: 0;
+  background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 40%, rgba(3, 11, 16, 0.55) 78%, rgba(3, 11, 16, 0.9) 100%);
+}
+body:not(.gallery):has(.screen:not([hidden]))::after {
+  inset: -50%;
+  opacity: 0.14;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .93 0 0 0 0 .93 0 0 0 0 .92 2.6 0 0 0 -1.05'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+  animation: grain 0.7s steps(1, end) infinite;
+}
+@keyframes grain {
+  0%   { transform: translate(0, 0); }
+  14%  { transform: translate(-7%, 4%); }
+  28%  { transform: translate(5%, -9%); }
+  42%  { transform: translate(-11%, -3%); }
+  57%  { transform: translate(9%, 7%); }
+  71%  { transform: translate(-3%, 10%); }
+  85%  { transform: translate(12%, -5%); }
+}
+
+/* "KILL YOUR AUDIENCE" + can, bottom right, like the ads. */
+#title-screen::after,
+#end-screen::after {
+  --can-h: clamp(56px, calc(var(--u) * 12), 190px);
+  content: 'KILL YOUR AUDIENCE';
+  position: absolute;
+  right: 4%;
+  bottom: 5%;
+  display: flex;
+  align-items: center;
+  height: var(--can-h);
+  padding-right: calc(var(--can-h) * 0.427 + var(--u) * 2.2);
+  font-size: clamp(9px, calc(var(--u) * 1.3), 19px);
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+  color: var(--type);
+  background: url(/img/raid-can.webp) right bottom / auto 100% no-repeat;
+  pointer-events: none;
+}
+
+/* Thin rough-bordered typewriter buttons. The #rough filter roughens the border too. */
+#start-button,
+#end-button {
+  position: absolute;
+  left: 50%;
+  bottom: 14%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.85em 1.7em 0.75em;
+  font-size: clamp(12px, calc(var(--u) * 1.7), 24px);
+  letter-spacing: 0.22em;
+  white-space: nowrap;
+  color: var(--type);
+  text-shadow: var(--inked);
+  background: none;
+  border: 1px solid rgba(237, 237, 236, 0.85);
+  border-radius: 0;
+  cursor: pointer;
+}
+#start-button:hover:enabled,
+#start-button:focus-visible,
+#end-button:hover,
+#end-button:focus-visible {
+  outline: none;
+  animation: flicker 0.9s steps(1, end) infinite;
+}
+@keyframes flicker {
+  0%   { opacity: 1; }
+  8%   { opacity: 0.55; }
+  12%  { opacity: 1; }
+  46%  { opacity: 0.8; }
+  50%  { opacity: 1; }
+  71%  { opacity: 0.4; }
+  74%  { opacity: 0.95; }
+}
+#start-button:disabled {
+  color: rgba(237, 237, 236, 0.5);
+  border-color: rgba(237, 237, 236, 0.25);
+  cursor: default;
+  animation: loading 1.6s ease-in-out infinite;
+}
+@keyframes loading { 50% { opacity: 0.55; } }
+
+/* ---------- Title ---------- */
+
+#title-screen {
+  background:
+    radial-gradient(ellipse 45% 55% at 58% 30%, rgba(45, 90, 129, 0.28), transparent 70%),
+    radial-gradient(ellipse 80% 75% at 55% 40%, var(--bg-glow) 0%, var(--bg) 45%, var(--bg-deep) 100%);
+}
+
+/* Headline top left in two lines. */
+#title-screen h1,
+#end-screen[data-result='lose'] #end-title {
+  position: absolute;
+  top: 8%;
+  left: 5%;
+  z-index: 1;
+  margin: 0;
+  max-width: 70%;
+  font-size: clamp(18px, calc(var(--u) * 3.7), 64px);
+  line-height: 1.22;
+  letter-spacing: 0.07em;
+  text-align: left;
+  color: var(--type);
+}
+#title-screen h1 span { display: block; }
+#title-screen h1 .red { color: inherit; }
+
+#subtitle { display: none; }
+
+/* The blurred spider from print1, creeping in the foreground. */
+#title-screen::before {
+  content: '';
+  position: absolute;
+  left: -10%;
+  bottom: -14%;
+  width: 72%;
+  aspect-ratio: 1000 / 557;
+  background: url(/img/spider-creep.webp) center / cover no-repeat;
+  opacity: 0.5;
+  filter: blur(3px) brightness(0.75) saturate(0.9);
+  -webkit-mask-image: radial-gradient(ellipse 55% 60% at 45% 55%, #000 35%, transparent 75%);
+  mask-image: radial-gradient(ellipse 55% 60% at 45% 55%, #000 35%, transparent 75%);
+  animation: creep 28s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes creep {
+  0%   { transform: translate(-5%, 4%) rotate(-1.5deg); }
+  55%  { transform: translate(1%, 0%) rotate(0.5deg); }
+  100% { transform: translate(4%, -3%) rotate(1.5deg); }
+}
+
+#mobile-note {
+  position: absolute;
+  left: 50%;
+  bottom: 14%;
+  transform: translateX(-50%);
+  width: 86%;
+  margin: 0;
+  font-size: clamp(12px, calc(var(--u) * 1.8), 22px);
+  letter-spacing: 0.15em;
+  text-align: center;
+}
+
+/* ---------- Pause ---------- */
+
+#pause-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: rgba(3, 11, 16, 0.8);
+  cursor: pointer;
+}
+#pause-screen h2 { margin: 0; font-size: clamp(28px, calc(var(--u) * 7), 110px); letter-spacing: 0.15em; }
+#pause-hint { margin-top: 1em; font-size: clamp(11px, calc(var(--u) * 1.5), 20px); letter-spacing: 0.22em; }
+
+/* ---------- Lose ---------- */
+
+/* See-through: the spider zoom underneath stays visible through the blue fade. */
+#end-screen[data-result='lose'] { background: transparent; }
+#end-screen[data-result='lose'] #end-title { animation: type-in 1.4s ease-out both; }
+#end-screen[data-result='lose'] #end-stats,
+#end-screen[data-result='lose'] #end-rank { display: none; }
+#end-screen[data-result='lose'] #end-button { animation: type-in 0.8s 1s ease-out both; }
+#end-screen[data-result='lose']::after { animation: type-in 0.8s 1.4s ease-out both; }
+
+@keyframes type-in {
+  0%   { opacity: 0; }
+  30%  { opacity: 0.7; }
+  36%  { opacity: 0.2; }
+  60%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+/* ---------- Win: case file card ---------- */
+
+#end-screen[data-result='win'] {
+  display: grid;
+  grid-template-columns: clamp(250px, calc(var(--u) * 46), 640px);
+  align-content: center;
+  justify-content: center;
+  padding-bottom: calc(var(--u) * 7);
+  background: radial-gradient(ellipse 80% 75% at 50% 42%, var(--bg-glow) 0%, var(--bg) 45%, var(--bg-deep) 100%);
+}
+
+/* The paper, sitting behind the title, fields and rank (grid rows 1-3). */
+#end-screen[data-result='win']::before {
+  content: '';
+  grid-column: 1;
+  grid-row: 1 / 4;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .1 0 0 0 0 .1 0 0 0 0 .1 -2.2 0 0 0 1.05'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+    radial-gradient(ellipse 85% 85% at 50% 45%, var(--paper) 55%, var(--paper-edge) 100%);
+  background-size: 300px 300px, auto;
+  box-shadow:
+    0 0 0 clamp(4px, calc(var(--u) * 0.7), 11px) var(--ink),
+    0 calc(var(--u) * 2) calc(var(--u) * 6) rgba(3, 11, 16, 0.75);
+  animation: card-in 0.6s ease-out both;
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(2%); }
+  to   { opacity: 1; transform: none; }
+}
+
+#end-screen[data-result='win'] > :not(#end-button) {
+  grid-column: 1;
+  position: relative;
+  margin: 0;
+  padding-inline: 8%;
+  color: var(--ink);
+  text-shadow: var(--inked-dark);
+  text-align: left;
+}
+#end-screen[data-result='win'] #end-title {
+  grid-row: 1;
+  padding-top: 1.1em;
+  padding-bottom: 0.55em;
+  font-size: clamp(20px, calc(var(--u) * 4), 58px);
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  animation: type-in 0.9s 0.3s ease-out both;
+}
+#end-screen[data-result='win'] #end-stats {
+  grid-row: 2;
+  font-size: clamp(11px, calc(var(--u) * 1.65), 22px);
+  letter-spacing: 0.08em;
+}
+#end-screen[data-result='win'] #end-stats p {
+  margin: 0 0 0.9em;
+  animation: type-in 0.6s ease-out both;
+}
+#end-screen[data-result='win'] #end-stats p:nth-child(1) { animation-delay: 0.7s; }
+#end-screen[data-result='win'] #end-stats p:nth-child(2) { animation-delay: 1s; }
+#end-screen[data-result='win'] #end-rank {
+  grid-row: 3;
+  padding-bottom: 1.6em;
+  font-size: clamp(11px, calc(var(--u) * 1.65), 22px);
+  letter-spacing: 0.08em;
+  animation: type-in 0.6s 1.3s ease-out both;
+}
+/* Field labels are bold like "SPOTTED BY:" on the cards. */
+#end-screen .field-label { font-weight: bold; -webkit-text-stroke: 0.35px currentColor; }
+
+#end-screen[data-result='win'] #end-button {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  transform: none;
+  grid-row: 4;
+  justify-self: center;
+  margin-top: calc(var(--u) * 3.2);
+  animation: type-in 0.6s 1.6s ease-out both;
+}
+#end-screen[data-result='win'] #end-button:hover,
+#end-screen[data-result='win'] #end-button:focus-visible {
+  animation: flicker 0.9s steps(1, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen *, .screen::before, .screen::after,
+  body:has(.screen:not([hidden]))::after { animation: none !important; }
+}

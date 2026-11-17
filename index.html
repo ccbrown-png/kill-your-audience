@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Some Stalkers Have Eight Legs</title>
+    <link rel="icon" href="data:," />
+    <!-- Adobe Fonts (Secret Service Typewriter). Replace YOUR_KIT_ID with the ID from your Adobe Fonts web project. -->
+    <link rel="stylesheet" href="https://use.typekit.net/YOUR_KIT_ID.css" />
+    <!-- Fallback typewriter face while the Adobe kit isn't set up. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" />
+    <link rel="stylesheet" href="/src/screens.css" />
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #030b10; }
+      canvas { display: block; }
+
+      #crosshair {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 6px;
+        height: 6px;
+        margin: -3px 0 0 -3px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 0 2px #000;
+        pointer-events: none;
+      }
+
+      #debug-label {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        padding: 4px 8px;
+        font: 13px/1.4 monospace;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.6);
+        pointer-events: none;
+      }
+
+      #routine-panel {
+        position: fixed;
+        bottom: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(360px, calc(100% - 32px));
+        padding: 8px 12px;
+        font: 16px sans-serif;
+        color: #fff;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.6);
+        pointer-events: none;
+      }
+      #routine-bar {
+        height: 10px;
+        margin-top: 6px;
+        background: rgba(255, 255, 255, 0.2);
+      }
+      #routine-fill {
+        width: 0%;
+        height: 100%;
+        background: #4fc3f7;
+      }
+
+      [hidden] { display: none !important; }
+
+      #kill-counter {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        padding: 4px 10px;
+        font: 22px Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        letter-spacing: 1px;
+        color: #efe6d0;
+        background: rgba(0, 0, 0, 0.6);
+        pointer-events: none;
+      }
+
+      /* Thin dread bar: no label, grows out from the middle of the top edge. */
+      #threat-bar {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 3px;
+        background: #b30d18;
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      /* While an ending plays: no HUD, no cursor. */
+      body.ended #crosshair,
+      body.ended #debug-label,
+      body.ended #routine-panel,
+      body.ended #kill-counter,
+      body.ended #threat-bar { display: none; }
+      body.ended canvas { cursor: none; }
+
+      #debug-panel {
+        position: fixed;
+        top: 48px;
+        left: 12px;
+        margin: 0;
+        padding: 6px 10px;
+        font: 13px/1.4 monospace;
+        color: #9f9;
+        background: rgba(0, 0, 0, 0.75);
+        pointer-events: none;
+      }
+      body.ended #debug-panel { display: none; }
+
+      /* Gallery mode (?gallery=NAME): no game UI, just the asset and a label. */
+      body.gallery #crosshair, body.gallery #debug-label, body.gallery #routine-panel, body.gallery #kill-counter,
+      body.gallery #threat-bar, body.gallery #title-screen { display: none !important; }
+      #gallery-label {
+        position: fixed; left: 12px; bottom: 12px; padding: 4px 8px;
+        font: 13px/1.4 monospace; color: #cfd8dc; background: rgba(0, 0, 0, 0.6); pointer-events: none;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="crosshair"></div>
+    <div id="debug-label">Target: none</div>
+    <div id="routine-panel">
+      <div id="routine-label"></div>
+      <div id="routine-bar"><div id="routine-fill"></div></div>
+    </div>
+    <div id="kill-counter">KILLS: 0</div>
+    <div id="threat-bar"></div>
+    <pre id="debug-panel" hidden></pre>
+    <div id="fade"></div>
+
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <!-- Fine, high-frequency wobble: an inked typewriter edge, not a blur. -->
+      <filter id="rough" x="-5%" y="-10%" width="110%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="8" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8" />
+      </filter>
+    </svg>
+
+    <div id="title-screen" class="screen">
+      <h1 class="horror-type"><span>SOME STALKERS</span><span class="red">HAVE EIGHT LEGS</span></h1>
+      <p id="subtitle">a Raid production</p>
+      <button id="start-button" class="horror-type" disabled>LOADING...</button>
+      <p id="mobile-note" class="horror-type" hidden>BEST PLAYED ON DESKTOP WITH A MOUSE</p>
+    </div>
+
+    <div id="pause-screen" class="screen" hidden>
+      <h2 class="horror-type">PAUSED</h2>
+      <p id="pause-hint">CLICK TO RESUME</p>
+    </div>
+
+    <div id="end-screen" class="screen" hidden>
+      <h2 id="end-title" class="horror-type"></h2>
+      <div id="end-stats"></div>
+      <p id="end-rank" class="horror-type" hidden></p>
+      <button id="end-button" class="horror-type"></button>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

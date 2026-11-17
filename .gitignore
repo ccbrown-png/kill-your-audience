@@ -1,0 +1,8 @@
+node_modules
+dist
+.DS_Store
+.vercel
+
+# Local-only: the pre-art-pass rollback copy (holds the original 20 MB bathtub.glb) and test screenshots.
+_backup_before_art_pass/
+art_pass_screenshots/
