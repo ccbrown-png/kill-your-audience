@@ -10,31 +10,22 @@ export function createGameFlow(domElement, { onPause, onRestart, onUserClick }) 
   const endButton = document.getElementById('end-button');
   const DEFAULT_PAUSE_HINT = pauseHint.textContent;
 
+  setUpFullscreenButton();
+
   let state = 'loading';
 
   const isLocked = () => document.pointerLockElement === domElement;
 
-  // Mouse look in a small embedded box is rough, so inside an iframe the game goes fullscreen on click.
-  // (The embedding <iframe> needs allow="fullscreen; pointer-lock" for this.)
-  const embedded = window.self !== window.top;
-
-  function grabPointer() {
+  // Clicking to play only grabs the mouse; the game stays at whatever size it is embedded at.
+  // Fullscreen is opt-in through the corner icon (see setUpFullscreenButton).
+  function lockMouse() {
+    onUserClick();
     // Newer browsers return a promise. Failures are handled by the pointerlockerror listener.
     domElement.requestPointerLock()?.catch?.(() => {});
   }
 
-  function lockMouse() {
-    onUserClick();
-    if (embedded && document.fullscreenEnabled && !document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(grabPointer, grabPointer);
-    } else {
-      grabPointer();
-    }
-  }
-
-  /** Esc (or the end of a round) leaves fullscreen cleanly, back to the embedded box. */
-  function leaveFullscreen() {
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  function setPlaying(playing) {
+    document.body.classList.toggle('playing', playing);
   }
 
   startButton.addEventListener('click', () => {
@@ -54,11 +45,14 @@ export function createGameFlow(domElement, { onPause, onRestart, onUserClick }) 
       titleScreen.hidden = true;
       pauseScreen.hidden = true;
       pauseHint.textContent = DEFAULT_PAUSE_HINT;
-    } else if (state === 'playing') {
-      state = 'paused';
-      pauseScreen.hidden = false;
-      onPause();
-      leaveFullscreen();
+      setPlaying(true);
+    } else {
+      setPlaying(false);
+      if (state === 'playing') {
+        state = 'paused';
+        pauseScreen.hidden = false;
+        onPause();
+      }
     }
   });
 
@@ -84,4 +78,37 @@ export function createGameFlow(domElement, { onPause, onRestart, onUserClick }) 
   }
 
   return { setReady, setLoadFailed, end, isPlaying: () => state === 'playing' };
+}
+
+/** Corner icon that toggles fullscreen. Hidden when the browser or the embedding iframe doesn't allow it. */
+function setUpFullscreenButton() {
+  const button = document.getElementById('fullscreen-button');
+  const doc = document;
+  const enabled = doc.fullscreenEnabled || doc.webkitFullscreenEnabled;
+  if (!enabled) {
+    button.hidden = true;
+    return;
+  }
+  const current = () => doc.fullscreenElement || doc.webkitFullscreenElement;
+
+  function sync() {
+    const on = Boolean(current());
+    button.classList.toggle('is-fullscreen', on);
+    button.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Enter fullscreen');
+    button.title = on ? 'Exit fullscreen' : 'Fullscreen';
+  }
+
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const el = doc.documentElement;
+    if (current()) {
+      (doc.exitFullscreen?.() ?? doc.webkitExitFullscreen?.())?.catch?.(() => {});
+    } else {
+      (el.requestFullscreen?.() ?? el.webkitRequestFullscreen?.())?.catch?.(() => {});
+    }
+    button.blur();
+  });
+  doc.addEventListener('fullscreenchange', sync);
+  doc.addEventListener('webkitfullscreenchange', sync);
+  sync();
 }

@@ -10,7 +10,7 @@
   --bg: #071623;
   --bg-glow: #0f2c49;
   --bg-light: #2d5a81;
-  /* brightest pixels of the "SOME STALKERS" headline */
+  /* brightest pixels of the campaign headline type */
   --type: #ededec;
   /* CARD paper and ink */
   --paper: #f1f1f0;
@@ -88,8 +88,7 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
   85%  { transform: translate(12%, -5%); }
 }
 
-/* "KILL YOUR AUDIENCE" + can, bottom right, like the ads. */
-#title-screen::after,
+/* "KILL YOUR AUDIENCE" + can, bottom right, like the ads. (The title screen has the can in its headline lockup.) */
 #end-screen::after {
   --can-h: clamp(56px, calc(var(--u) * 12), 190px);
   content: 'KILL YOUR AUDIENCE';
@@ -175,6 +174,30 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
   color: var(--type);
 }
 #title-screen h1 span { display: block; }
+
+/* Headline and can as one lockup, top left. The h1 keeps its shared type styling but flows inside the lockup. */
+#title-lockup {
+  position: absolute;
+  top: 8%;
+  left: 5%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, calc(var(--u) * 2), 34px);
+  max-width: 90%;
+}
+#title-screen #title-lockup h1 {
+  position: static;
+  max-width: none;
+  white-space: nowrap;
+}
+#title-can {
+  display: block;
+  height: clamp(56px, calc(var(--u) * 12), 190px);
+  width: auto;
+  pointer-events: none;
+  user-select: none;
+}
 #title-screen h1 .red { color: inherit; }
 
 #subtitle { display: none; }
@@ -328,6 +351,64 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
 #end-screen[data-result='win'] #end-button:focus-visible {
   animation: flicker 0.9s steps(1, end) infinite;
 }
+
+/* ---------- Corner controls ---------- */
+
+/* Icon-only fullscreen toggle, bottom right, above screens and grain. Thin typewriter-button border. */
+#fullscreen-button {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: var(--type);
+  background: rgba(3, 11, 16, 0.45);
+  border: 1px solid rgba(237, 237, 236, 0.55);
+  border-radius: 0;
+  cursor: pointer;
+  opacity: 0.75;
+}
+#fullscreen-button svg {
+  width: 18px;
+  height: 18px;
+  shape-rendering: crispEdges;
+}
+#fullscreen-button:hover,
+#fullscreen-button:focus-visible {
+  outline: none;
+  opacity: 1;
+  border-color: rgba(237, 237, 236, 0.9);
+}
+#fullscreen-button .fs-exit,
+#fullscreen-button.is-fullscreen .fs-enter { display: none; }
+#fullscreen-button.is-fullscreen .fs-exit { display: block; }
+/* While playing the mouse is locked, so the icon is only a reminder: keep it faint. */
+body.playing #fullscreen-button { opacity: 0.35; }
+
+/* "ESC" hint chip, tucked under the kill counter while playing. */
+#esc-hint {
+  position: fixed;
+  top: 52px;
+  right: 12px;
+  z-index: 12;
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px 2px;
+  font: 11px/1 var(--font-type);
+  letter-spacing: 0.18em;
+  color: var(--type);
+  background: rgba(3, 11, 16, 0.45);
+  border: 1px solid rgba(237, 237, 236, 0.45);
+  opacity: 0.7;
+  pointer-events: none;
+}
+#esc-hint svg { shape-rendering: crispEdges; }
+body.playing:not(.ended) #esc-hint { display: flex; }
 
 @media (prefers-reduced-motion: reduce) {
   .screen *, .screen::before, .screen::after,
