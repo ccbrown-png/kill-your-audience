@@ -202,9 +202,8 @@
 
     <!-- First thing on the page. Shown until the player chooses; src/aiWarning.js. -->
     <div id="ai-warning" class="screen">
-      <div class="ai-tape" aria-hidden="true"></div>
       <div id="ai-ask" class="ai-card">
-        <h2 class="horror-type">WARNING: THIS NEXT THING WAS MADE WITH GENERATIVE AI.</h2>
+        <h2 class="horror-type"><span class="ai-warn">WARNING:</span> THIS NEXT THING WAS MADE WITH GENERATIVE AI.</h2>
         <p class="ai-body">If you hate AI, now's the time to shield your eyes and move on (no hard feelings).</p>
         <div class="ai-buttons">
           <button id="ai-leave" class="menu-button horror-type" type="button">SHIELD MY EYES</button>
@@ -216,7 +215,6 @@
         <p class="ai-body">Respect. Nothing to see here. Go enjoy a nice, normal, spider-free shower.</p>
         <button id="ai-back" class="ai-link" type="button">wait, actually, show me</button>
       </div>
-      <div class="ai-tape ai-tape-bottom" aria-hidden="true"></div>
     </div>
 
     <div id="pause-screen" class="screen" hidden>

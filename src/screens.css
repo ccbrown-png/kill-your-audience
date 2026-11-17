@@ -274,20 +274,6 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
   background: radial-gradient(ellipse 80% 75% at 50% 45%, var(--bg-glow) 0%, var(--bg) 45%, var(--bg-deep) 100%);
   overflow-y: auto;
 }
-/* Hazard-tape bands, top and bottom, in the campaign's paper and ink. */
-.ai-tape {
-  position: absolute;
-  left: -5%;
-  right: -5%;
-  top: 4%;
-  height: clamp(10px, calc(var(--u) * 1.6), 22px);
-  background: repeating-linear-gradient(-45deg, var(--type) 0 14px, var(--bg-deep) 14px 28px);
-  opacity: 0.75;
-  transform: rotate(-1.2deg);
-  pointer-events: none;
-}
-.ai-tape-bottom { top: auto; bottom: 4%; transform: rotate(0.9deg); }
-
 .ai-card {
   position: relative;
   max-width: 720px;
@@ -306,6 +292,9 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
   text-wrap: balance;
   letter-spacing: 0.06em;
 }
+/* The warning line: only WARNING: keeps the bold white stroke; the rest is plain. */
+#ai-ask h2 { font-weight: normal; -webkit-text-stroke: 0; }
+#ai-ask h2 .ai-warn { font-weight: bold; -webkit-text-stroke: 1px #fff; paint-order: stroke fill; }
 .ai-body {
   margin: 1.2em auto 0;
   max-width: 34em;
