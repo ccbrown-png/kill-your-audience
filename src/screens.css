@@ -296,15 +296,11 @@ body:not(.gallery):has(.screen:not([hidden]))::after {
 #ai-warning[data-state='shielded'] #ai-ask { display: none; }
 #ai-warning[data-state='shielded'] #ai-shielded { display: block; animation: type-in 0.9s ease-out both; }
 
-.ai-kicker {
-  margin: 0 0 1em;
-  font-size: clamp(11px, calc(var(--u) * 1.5), 20px);
-  letter-spacing: 0.3em;
-  opacity: 0.8;
-  animation: flicker 2.4s steps(1, end) infinite;
-}
 .ai-card h2 {
   margin: 0;
+  font-weight: bold;
+  -webkit-text-stroke: 1px #fff;
+  paint-order: stroke fill;
   font-size: clamp(20px, calc(var(--u) * 4.2), 58px);
   line-height: 1.2;
   text-wrap: balance;
